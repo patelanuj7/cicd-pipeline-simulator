@@ -56,7 +56,7 @@ cicd-pipeline-simulator/
 
 ### Tech choices
 
-- **Node 24**, npm workspaces, ESLint 9 (flat config), Vitest for JS/TS tests.
+- **Node 24**, npm workspaces, ESLint 10 (flat config), Vitest for JS/TS tests.
 - **service:** Express 5, plain JavaScript (ES modules).
 - **dashboard:** Vite + React + TypeScript; Recharts for charts; Express backend run with `tsx` in dev, compiled with `tsc` for prod.
 - **scripts:** Bash (runs in Git Bash locally, Ubuntu in CI) and Python 3.12 standard library only (`urllib`), tested with pytest.
@@ -166,7 +166,7 @@ Each phase ends with a commit. Commit messages use Conventional Commits.
 - **Commit:** `feat(service): add express app with health endpoint and tests`
 
 ### Phase 2: Linting
-- ESLint 9 flat config at the root covering both workspaces; root script `npm run lint`.
+- ESLint 10 flat config at the root covering both workspaces; root script `npm run lint`.
 - **Done when:** `npm run lint` exits 0; adding an unused variable makes it fail (then remove it).
 - **Commit:** `chore: add eslint flat config for all workspaces`
 
