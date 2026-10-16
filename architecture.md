@@ -1,6 +1,6 @@
 # CI/CD Pipeline Simulator: Architecture & Build Plan
 
-> **For Claude Code:** Read this whole file before doing anything. Work on **one phase at a time**. At the end of each phase, run every "Done when" check, show the output, and **stop and wait** for the human to confirm and commit. Do not start the next phase on your own.
+> **For Claude Code:** Read this whole file before doing anything. Work on **one phase at a time**. At the end of each phase, run every "Done when" check and show the output; once they pass, commit and push (see rule 1 in section 4), then **stop**. Do not start the next phase on your own.
 
 ---
 
@@ -131,7 +131,7 @@ Import everything from `server/core/index.ts`. Tests live in `server/core/__test
 
 ## 4. Rules for Claude Code
 
-1. One phase at a time. Stop after the "Done when" checks and wait for the human to confirm.
+1. Do one phase at a time. When every Done-when check passes, commit with the phase's commit message and push, then summarize what you built and stop. If a check needs the human to look at something (Docker status, the Actions tab, GitHub Packages, Render), ask them to confirm before committing.
 2. Show the exact commands to run on **Windows** (PowerShell or Git Bash; say which).
 3. Never commit secrets. Tokens go in `.env` (git-ignored) locally and GitHub Secrets in CI. Provide `.env.example`.
 4. Don't change `dashboard/server/core/` without updating its tests and running them.
