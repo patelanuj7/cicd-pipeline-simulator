@@ -1,0 +1,9 @@
+{
+  // Production build of the API server: same settings as tsconfig.json, minus tests.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "sourceMap": true
+  },
+  "exclude": ["server/**/__tests__/**"]
+}

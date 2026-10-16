@@ -1,4 +1,6 @@
 import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import express from 'express';
 import { createGitHubClient } from './core/index.js';
 import { createApp } from './routes.js';
 
@@ -20,6 +22,19 @@ const client = createGitHubClient({ token: requireEnv('GITHUB_TOKEN'), owner, re
 
 const app = createApp(client, { workflowFile: process.env.WORKFLOW_FILE, repo: `${owner}/${repo}` });
 const port = Number(process.env.PORT) || 8787;
+
+// In production (node dist/server/index.js) also serve the built React app from
+// dist/client. In dev, Vite serves it instead and this folder may not exist.
+const clientDir = fileURLToPath(new URL('../client', import.meta.url));
+if (existsSync(clientDir)) {
+  // Vite fingerprints asset filenames, so they can be cached for good.
+  app.use('/assets', express.static(`${clientDir}/assets`, { immutable: true, maxAge: '1y' }));
+  app.use(express.static(clientDir, { maxAge: 0 }));
+  // The UI uses hash routes, so every other GET just gets index.html. Missing
+  // /assets files are excluded so they 404 instead of returning HTML as "JS".
+  app.get(/^(?!\/(api|assets)\/).*/, (_req, res) => res.sendFile(`${clientDir}/index.html`));
+  console.log(`serving dashboard UI from ${clientDir}`);
+}
 
 const server = app.listen(port, () => {
   console.log(`dashboard API listening on http://localhost:${port}/api`);

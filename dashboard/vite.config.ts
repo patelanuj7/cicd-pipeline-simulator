@@ -12,5 +12,17 @@ export default defineConfig({
     // dist/server is the compiled API (tsc); dist/client is what it serves.
     outDir: 'dist/client',
     emptyOutDir: true,
+    // The vendor chunk (mostly Recharts) is ~600 kB raw / ~175 kB gzipped and is
+    // cached separately, so the default 500 kB warning doesn't apply to it.
+    chunkSizeWarningLimit: 700,
+    rolldownOptions: {
+      output: {
+        // Libraries (React, Recharts) change rarely; a separate chunk stays cached
+        // in the browser across app deploys.
+        codeSplitting: {
+          groups: [{ name: 'vendor', test: /node_modules/ }],
+        },
+      },
+    },
   },
 });
