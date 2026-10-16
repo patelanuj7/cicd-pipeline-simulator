@@ -2,6 +2,7 @@
 // Run from the repo root: `npm run lint`.
 import js from '@eslint/js';
 import { defineConfig } from 'eslint/config';
+import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
@@ -42,9 +43,10 @@ export default defineConfig(
     },
   },
 
-  // The React app (added in Phase 10) runs in the browser.
+  // The React app runs in the browser; hooks rules catch stale deps and misuse.
   {
     files: ['dashboard/src/**/*.{ts,tsx}'],
+    extends: [reactHooks.configs.flat.recommended],
     languageOptions: {
       globals: globals.browser,
     },

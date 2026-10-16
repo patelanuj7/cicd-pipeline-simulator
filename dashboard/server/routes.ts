@@ -9,10 +9,13 @@ import {
   type Job,
   type WorkflowRun,
 } from './core/index.js';
+import type { JobSummary, RunSummary } from './apiTypes.js';
 
 export interface AppOptions {
   /** Only runs of this workflow file are shown. Default "pipeline.yml". */
   workflowFile?: string;
+  /** "owner/repo", shown in the UI header. */
+  repo?: string;
 }
 
 // Stage-failure stats need each failed run's jobs (one API call per run), so cap
@@ -46,7 +49,7 @@ function validTimeZone(tz: string): string {
 }
 
 // GitHub returns large objects; the UI only needs these fields.
-function toRunSummary(run: WorkflowRun) {
+function toRunSummary(run: WorkflowRun): RunSummary {
   return {
     id: run.id,
     runNumber: run.run_number,
@@ -61,10 +64,12 @@ function toRunSummary(run: WorkflowRun) {
     updatedAt: run.updated_at,
     durationMs: runDurationMs(run),
     url: run.html_url,
+    // html_url is https://github.com/<owner>/<repo>/actions/runs/<id>
+    commitUrl: run.html_url.replace(/\/actions\/runs\/\d+.*$/, `/commit/${run.head_sha}`),
   };
 }
 
-function toJobSummary(job: Job) {
+function toJobSummary(job: Job): JobSummary {
   const started = job.started_at ? Date.parse(job.started_at) : NaN;
   const completed = job.completed_at ? Date.parse(job.completed_at) : NaN;
   return {
@@ -92,6 +97,10 @@ export function createApiRouter(client: GitHubClient, options: AppOptions = {}) 
 
   router.get('/health', (_req, res) => {
     res.json({ status: 'ok' });
+  });
+
+  router.get('/config', (_req, res) => {
+    res.json({ repo: options.repo ?? '', workflowFile });
   });
 
   router.get('/runs', async (req, res) => {

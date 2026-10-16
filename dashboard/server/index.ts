@@ -14,13 +14,11 @@ function requireEnv(name: string): string {
   return value;
 }
 
-const client = createGitHubClient({
-  token: requireEnv('GITHUB_TOKEN'),
-  owner: requireEnv('GITHUB_OWNER'),
-  repo: requireEnv('GITHUB_REPO'),
-});
+const owner = requireEnv('GITHUB_OWNER');
+const repo = requireEnv('GITHUB_REPO');
+const client = createGitHubClient({ token: requireEnv('GITHUB_TOKEN'), owner, repo });
 
-const app = createApp(client, { workflowFile: process.env.WORKFLOW_FILE });
+const app = createApp(client, { workflowFile: process.env.WORKFLOW_FILE, repo: `${owner}/${repo}` });
 const port = Number(process.env.PORT) || 8787;
 
 const server = app.listen(port, () => {

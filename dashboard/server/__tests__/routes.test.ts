@@ -23,6 +23,13 @@ describe('GET /api/health', () => {
   });
 });
 
+describe('GET /api/config', () => {
+  it('reports the repo and workflow file', async () => {
+    const res = await request(createApp(fakeClient(), { repo: 'o/r' })).get('/api/config');
+    expect(res.body).toEqual({ repo: 'o/r', workflowFile: 'pipeline.yml' });
+  });
+});
+
 describe('GET /api/runs', () => {
   it('returns trimmed run summaries for the pipeline workflow', async () => {
     const r = run({ id: 1, head_sha: 'abc123', display_title: 'feat: thing' });
@@ -46,6 +53,7 @@ describe('GET /api/runs', () => {
         updatedAt: r.updated_at,
         durationMs: 120_000,
         url: r.html_url,
+        commitUrl: 'https://github.com/o/r/commit/abc123',
       },
     ]);
     expect(client.listWorkflowRuns).toHaveBeenCalledWith(
