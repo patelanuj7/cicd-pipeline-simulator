@@ -2,6 +2,19 @@
   "name": "service",
   "version": "0.1.0",
   "private": true,
-  "description": "Placeholder. Phase 1 turns this into the Express app the pipeline ships.",
-  "type": "module"
+  "description": "Tiny Express API shipped by the pipeline. /health reports the git SHA it was built from.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "supertest": "^7.1.0",
+    "vitest": "^3.2.0"
+  }
 }
