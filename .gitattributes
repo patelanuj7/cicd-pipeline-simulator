@@ -1,0 +1,16 @@
+# Let Git normalize text files to LF in the repo.
+* text=auto
+
+# Shell and Python scripts MUST be LF even on Windows,
+# otherwise Linux CI runners fail with "bad interpreter: /bin/bash^M".
+*.sh  text eol=lf
+*.py  text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.gif binary
+*.zip binary

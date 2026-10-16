@@ -1,0 +1,7 @@
+{
+  "name": "service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Placeholder. Phase 1 turns this into the Express app the pipeline ships.",
+  "type": "module"
+}
