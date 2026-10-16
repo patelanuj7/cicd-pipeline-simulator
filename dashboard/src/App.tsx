@@ -1,14 +1,25 @@
 import { useEffect, useState } from 'react';
-import type { ConfigResponse, RunSummary } from '../server/apiTypes';
+import type { ConfigResponse, RunSummary, Stats } from '../server/apiTypes';
 import { describeError, fetchJson } from './api';
+import { DailyChart } from './components/charts/DailyChart';
+import { DurationChart } from './components/charts/DurationChart';
+import { StageFailuresChart } from './components/charts/StageFailuresChart';
 import { RunsTable } from './components/RunsTable';
+import { StatTiles } from './components/StatTiles';
+import { useChartTheme } from './hooks/useChartTheme';
 import { usePolling } from './hooks/usePolling';
 import { formatRelative } from './lib/format';
 
 const POLL_MS = 20_000;
 
+// Group "runs per day" by the viewer's own calendar days.
+const TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 const fetchRuns = (signal: AbortSignal) =>
   fetchJson<{ runs: RunSummary[] }>('/api/runs?limit=50', signal).then((r) => r.runs);
+
+const fetchStats = (signal: AbortSignal) =>
+  fetchJson<Stats>(`/api/stats?timeZone=${encodeURIComponent(TIME_ZONE)}`, signal);
 
 /** Re-render every `ms` so relative times ("2 minutes ago") stay current. */
 function useNow(ms: number): number {
@@ -23,7 +34,14 @@ function useNow(ms: number): number {
 export function App() {
   const [config, setConfig] = useState<ConfigResponse | null>(null);
   const runs = usePolling(fetchRuns, POLL_MS);
+  const stats = usePolling(fetchStats, POLL_MS);
+  const theme = useChartTheme();
   const now = useNow(10_000);
+  const error = runs.error ?? stats.error;
+  const refreshAll = () => {
+    runs.refresh();
+    stats.refresh();
+  };
 
   useEffect(() => {
     fetchJson<ConfigResponse>('/api/config')
@@ -43,18 +61,28 @@ export function App() {
           )}
         </div>
         <div className="header__status" aria-live="polite">
-          <span className={`live-dot ${runs.error ? 'live-dot--stale' : ''}`} aria-hidden="true" />
+          <span className={`live-dot ${error ? 'live-dot--stale' : ''}`} aria-hidden="true" />
           {runs.updatedAt ? `Updated ${formatRelative(runs.updatedAt.toISOString(), now)}` : 'Loading…'}
-          <button type="button" className="button" onClick={runs.refresh}>
+          <button type="button" className="button" onClick={refreshAll}>
             Refresh
           </button>
         </div>
       </header>
 
-      {runs.error != null && (
+      {error != null && (
         <div className="banner" role="alert">
-          {describeError(runs.error)}
-          {runs.data && ' Showing the last data received.'}
+          {describeError(error)}
+          {(runs.data || stats.data) && ' Showing the last data received.'}
+        </div>
+      )}
+
+      <StatTiles stats={stats.data} />
+
+      {stats.data && runs.data && (
+        <div className="charts">
+          <DailyChart daily={stats.data.daily} theme={theme} timeZone={TIME_ZONE} />
+          <StageFailuresChart stageFailures={stats.data.stageFailures} failedRuns={stats.data.failed} theme={theme} />
+          <DurationChart runs={runs.data} theme={theme} />
         </div>
       )}
 

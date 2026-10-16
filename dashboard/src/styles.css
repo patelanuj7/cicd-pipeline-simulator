@@ -18,6 +18,13 @@
   --banner-border: #d4a72c;
   --radius: 10px;
   --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Chart series. Blue/red, not green/red: green/red fails deuteranopia (ΔE 4.1);
+     this pair passes the CVD checks in both modes (ΔE >= 19). */
+  --chart-pass: #2a78d6;
+  --chart-fail: #e34948;
+  --chart-grid: #eceef1;
+  --chart-axis: #d0d7de;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,6 +45,10 @@
     --skeleton: #21262d;
     --banner-bg: rgba(187, 128, 9, 0.15);
     --banner-border: #9e6a03;
+    --chart-pass: #3987e5;
+    --chart-fail: #e66767;
+    --chart-grid: #21262d;
+    --chart-axis: #30363d;
   }
 }
 
@@ -139,6 +150,199 @@ a:hover {
   font-size: 15px;
   font-weight: 600;
   border-bottom: 1px solid var(--border);
+}
+
+/* Stat tiles */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin: 0 0 16px;
+}
+.tile {
+  margin: 0;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tile__label {
+  color: var(--muted);
+  font-size: 13px;
+}
+.tile__value {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.tile__detail {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.tile__value-skeleton {
+  height: 28px;
+  width: 40%;
+}
+
+/* Charts */
+.charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.chart-card--wide {
+  grid-column: 1 / -1;
+}
+@media (max-width: 760px) {
+  .charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.chart-card__header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px 16px 0;
+}
+.chart-card__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.chart-card__subtitle {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.chart-card__plot {
+  padding: 12px 8px 4px;
+}
+.chart-empty {
+  height: 240px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+}
+
+.legend {
+  display: flex;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 12px;
+}
+.legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend__key {
+  display: inline-block;
+}
+.legend__key--square {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+.legend__key--line {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+}
+.legend__key--dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.tooltip {
+  min-width: 140px;
+  max-width: 280px;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  font-size: 12px;
+}
+.tooltip__heading {
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.tooltip__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tooltip__key {
+  width: 10px;
+  height: 2px;
+  border-radius: 1px;
+}
+.tooltip__value {
+  font-size: 13px;
+}
+.tooltip__label {
+  color: var(--muted);
+}
+.tooltip__note {
+  margin-top: 4px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chart-table {
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+}
+.chart-table summary {
+  padding: 8px 16px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+.chart-table[open] summary {
+  border-bottom: 1px solid var(--border);
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table th,
+.data-table td {
+  padding: 6px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+.data-table th {
+  color: var(--muted);
+  font-weight: 600;
+}
+.data-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.data-table__text {
+  max-width: 360px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Runs table */
