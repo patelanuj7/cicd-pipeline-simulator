@@ -1,0 +1,13 @@
+# The build context is the repo root (docker build -f service/Dockerfile .).
+# Allowlist: ignore everything, then re-include only what the service image needs.
+# This keeps out node_modules, .git, .env files, tests, and all dashboard source.
+*
+
+!package.json
+!package-lock.json
+
+# npm ci needs every workspace's package.json to validate the lockfile.
+!service/package.json
+!dashboard/package.json
+
+!service/src/

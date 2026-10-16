@@ -49,6 +49,7 @@ cicd-pipeline-simulator/
 │   └── package.json
 ├── docs/release-steps.md            # manual vs. automated release, step counts
 ├── package.json                     # npm workspaces: service, dashboard
+├── .dockerignore                    # allowlist for the service image (context = repo root)
 ├── .gitattributes                   # forces LF line endings on .sh/.py (Windows!)
 ├── architecture.md                  # this file
 └── README.md
@@ -74,7 +75,7 @@ git push
 GitHub Actions: pipeline.yml
    ├─ lint    : npm ci → npm run lint (all workspaces)
    ├─ test    : scripts/run-tests.sh → JUnit XML uploaded as artifact        (needs: lint)
-   ├─ build   : docker build --build-arg GIT_SHA=$GITHUB_SHA → push to GHCR  (needs: test)
+   ├─ build   : docker build -f service/Dockerfile --build-arg GIT_SHA=$GITHUB_SHA . → push to GHCR  (needs: test)
    └─ deploy  : main branch only → trigger host deploy (secret DEPLOY_HOOK_URL)
                 → python scripts/healthcheck.py --url $SERVICE_URL --expect-sha $GITHUB_SHA
                 → job FAILS if the new version isn't healthy in time        (needs: build)
@@ -171,8 +172,8 @@ Each phase ends with a commit. Commit messages use Conventional Commits.
 - **Commit:** `chore: add eslint flat config for all workspaces`
 
 ### Phase 3: Dockerize the service
-- Multi-stage `service/Dockerfile` on `node:24-alpine`; `ARG GIT_SHA` → `ENV GIT_SHA`; non-root user; `HEALTHCHECK` calling `/health`; `.dockerignore`.
-- **Done when:** `docker build -t svc --build-arg GIT_SHA=abc123 service` succeeds; `docker run -p 3000:3000 svc`, and `/health` shows `"sha":"abc123"`; `docker ps` shows `(healthy)` after ~30s.
+- Multi-stage `service/Dockerfile` on `node:24-alpine`; `ARG GIT_SHA` → `ENV GIT_SHA`; non-root user; `HEALTHCHECK` calling `/health`. The build context is the **repo root** so `npm ci --omit=dev -w service` can use the root `package-lock.json`; a root `.dockerignore` (allowlist) keeps out `node_modules`, `.git`, `.env`, tests, and dashboard source.
+- **Done when:** `docker build -f service/Dockerfile -t svc --build-arg GIT_SHA=abc123 .` succeeds; `docker run -p 3000:3000 svc`, and `/health` shows `"sha":"abc123"`; `docker ps` shows `(healthy)` after ~30s.
 - **Commit:** `feat(service): add multi-stage dockerfile with healthcheck`
 
 ### Phase 4: Test runner script
@@ -187,7 +188,7 @@ Each phase ends with a commit. Commit messages use Conventional Commits.
 - **Commit:** `ci: add lint and test stages`
 
 ### Phase 6: Pipeline stage 3 (build & push image)
-- `build` job (`needs: test`): buildx, login to GHCR with `GITHUB_TOKEN` (`permissions: packages: write`), tags `sha-<short>` and `latest` (main only), `GIT_SHA` build arg, GitHub Actions layer cache. On PRs: build but don't push.
+- `build` job (`needs: test`): buildx, login to GHCR with `GITHUB_TOKEN` (`permissions: packages: write`), tags `sha-<short>` and `latest` (main only), `GIT_SHA` build arg, GitHub Actions layer cache. On PRs: build but don't push. The build context is the repo root with `file: service/Dockerfile` (see Phase 3), not `service/`.
 - **Done when:** push to main → image appears under the repo's Packages; `docker pull` of the `sha-` tag works.
 - **Commit:** `ci: build and push service image to ghcr`
 
