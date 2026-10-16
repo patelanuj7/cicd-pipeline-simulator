@@ -1,6 +1,7 @@
 {
   "name": "cicd-pipeline-simulator",
   "private": true,
+  "type": "module",
   "description": "A 4-stage CI/CD pipeline (GitHub Actions + Docker) with a React dashboard over the GitHub API.",
   "workspaces": [
     "service",
@@ -10,7 +11,14 @@
     "node": ">=22"
   },
   "scripts": {
+    "lint": "eslint .",
     "test": "npm test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
+    "typescript-eslint": "^8.71.2"
   }
 }

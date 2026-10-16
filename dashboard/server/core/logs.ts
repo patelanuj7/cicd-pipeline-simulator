@@ -18,7 +18,7 @@ export interface ParsedLog {
 }
 
 // Each raw line starts like: 2026-10-15T09:12:33.1234567Z
-const TIMESTAMP = /^﻿?\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z ?/;
+const TIMESTAMP = /^\uFEFF?\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z ?/;
 // Terminal color/cursor codes, e.g. \x1b[31m (red) or \x1b[0m (reset).
 // eslint-disable-next-line no-control-regex
 const ANSI = /\x1b\[[0-9;?]*[A-Za-z]/g;

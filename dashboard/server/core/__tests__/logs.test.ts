@@ -28,6 +28,8 @@ describe('parseLog', () => {
     expect(parsed.groups[0]!.lines[0]!.text).toBe("Current runner version: '2.329.0'");
     const step = parsed.groups[2]!;
     expect(step.lines[0]!.text).toBe('npm test');
+    // Matching the ESC control character is the point: no ANSI codes may survive.
+    // eslint-disable-next-line no-control-regex
     expect(step.lines.map((l) => l.text).join('\n')).not.toMatch(/\u001b|\d{4}-\d{2}-\d{2}T/);
   });
 
