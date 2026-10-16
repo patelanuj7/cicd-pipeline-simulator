@@ -1,5 +1,6 @@
 import type { RunSummary } from '../../server/apiTypes';
 import { firstLine, formatDuration, formatRelative, shortSha } from '../lib/format';
+import { runHref } from '../lib/route';
 import { StatusBadge } from './StatusBadge';
 
 interface Props {
@@ -52,7 +53,7 @@ export function RunsTable({ runs, loading, now }: Props) {
                     <StatusBadge status={run.status} conclusion={run.conclusion} />
                   </td>
                   <td className="commit">
-                    <a href={run.url} target="_blank" rel="noreferrer" className="commit__title" title={run.title}>
+                    <a href={runHref(run.id)} className="commit__title" title={run.title}>
                       {firstLine(run.title)}
                     </a>
                     <span className="commit__meta">

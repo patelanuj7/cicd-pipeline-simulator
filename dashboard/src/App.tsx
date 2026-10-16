@@ -4,9 +4,11 @@ import { describeError, fetchJson } from './api';
 import { DailyChart } from './components/charts/DailyChart';
 import { DurationChart } from './components/charts/DurationChart';
 import { StageFailuresChart } from './components/charts/StageFailuresChart';
+import { RunDetail } from './components/RunDetail';
 import { RunsTable } from './components/RunsTable';
 import { StatTiles } from './components/StatTiles';
 import { useChartTheme } from './hooks/useChartTheme';
+import { useHashRoute } from './hooks/useHashRoute';
 import { usePolling } from './hooks/usePolling';
 import { formatRelative } from './lib/format';
 
@@ -37,6 +39,13 @@ export function App() {
   const stats = usePolling(fetchStats, POLL_MS);
   const theme = useChartTheme();
   const now = useNow(10_000);
+  const route = useHashRoute();
+  const detailRunId = route.page === 'run' ? route.runId : null;
+
+  // Start each page at the top (the log viewer then scrolls to its first error).
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [detailRunId]);
   const error = runs.error ?? stats.error;
   const refreshAll = () => {
     runs.refresh();
@@ -76,20 +85,32 @@ export function App() {
         </div>
       )}
 
-      <StatTiles stats={stats.data} />
+      {route.page === 'run' ? (
+        <RunDetail
+          key={route.runId}
+          runId={route.runId}
+          jobId={route.jobId}
+          run={runs.data?.find((r) => r.id === route.runId)}
+          now={now}
+        />
+      ) : (
+        <>
+          <StatTiles stats={stats.data} />
 
-      {stats.data && runs.data && (
-        <div className="charts">
-          <DailyChart daily={stats.data.daily} theme={theme} timeZone={TIME_ZONE} />
-          <StageFailuresChart stageFailures={stats.data.stageFailures} failedRuns={stats.data.failed} theme={theme} />
-          <DurationChart runs={runs.data} theme={theme} />
-        </div>
+          {stats.data && runs.data && (
+            <div className="charts">
+              <DailyChart daily={stats.data.daily} theme={theme} timeZone={TIME_ZONE} />
+              <StageFailuresChart stageFailures={stats.data.stageFailures} failedRuns={stats.data.failed} theme={theme} />
+              <DurationChart runs={runs.data} theme={theme} />
+            </div>
+          )}
+
+          <section className="card">
+            <h2 className="card__title">Build history</h2>
+            <RunsTable runs={runs.data} loading={runs.loading} now={now} />
+          </section>
+        </>
       )}
-
-      <section className="card">
-        <h2 className="card__title">Build history</h2>
-        <RunsTable runs={runs.data} loading={runs.loading} now={now} />
-      </section>
     </div>
   );
 }
