@@ -106,3 +106,43 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    name: deploy
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.SERVICE_URL }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Check deploy configuration
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+          SERVICE_URL: ${{ vars.SERVICE_URL }}
+        run: |
+          [ -n "$DEPLOY_HOOK_URL" ] || { echo "::error::Secret DEPLOY_HOOK_URL is not set"; exit 1; }
+          [ -n "$SERVICE_URL" ] || { echo "::error::Variable SERVICE_URL is not set"; exit 1; }
+
+      # Pass imgURL so Render deploys this exact build (sha-<7 chars>, the tag the
+      # build job pushed) rather than whatever :latest points to at that moment.
+      - name: Trigger Render deploy
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+          IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/cicd-pipeline-simulator-service
+        run: |
+          IMAGE="${IMAGE_NAME}:sha-${GITHUB_SHA::7}"
+          echo "Deploying $IMAGE"
+          encoded=$(jq -rn --arg v "$IMAGE" '$v | @uri')
+          curl --fail-with-body --silent --show-error -X POST "${DEPLOY_HOOK_URL}&imgURL=${encoded}"
+          echo
+
+      # The deploy only counts once the new commit is the one answering /health.
+      - name: Verify new version is live
+        run: python scripts/healthcheck.py --url "${{ vars.SERVICE_URL }}" --expect-sha "${{ github.sha }}"
