@@ -11,7 +11,7 @@ app.get('/', (_req, res) => {
 
 app.get('/health', (_req, res) => {
   res.json({
-    status: 'ok',
+    status: process.env.NODE_ENV === 'production' ? 'broken' : 'ok', // TEMP: deploy-gate check
     // Baked into the image at build time (Dockerfile ARG/ENV); "dev" when run locally.
     sha: process.env.GIT_SHA ?? 'dev',
     uptimeSeconds: Math.floor((Date.now() - startedAt) / 1000),
