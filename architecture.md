@@ -155,7 +155,7 @@ Import everything from `server/core/index.ts`. Tests live in `server/core/__test
 
 Each phase ends with a commit. Commit messages use Conventional Commits.
 
-### Phase 0: Scaffold (starter zip) — done by the human, see README "Getting started"
+### Phase 0: Scaffold (starter zip) — done by the human (setup now lives in README "Run it locally")
 - Unzip the starter, `npm install`, `git init`, add the GitHub remote (`https://github.com/patelanuj7/cicd-pipeline-simulator.git`).
 - **Done when:** `npm install` succeeds; `npm test -w dashboard` passes (50 core tests); `npm run typecheck` passes; `git status` shows no `node_modules`.
 - **Commit:** `chore: scaffold monorepo with tested dashboard core`
